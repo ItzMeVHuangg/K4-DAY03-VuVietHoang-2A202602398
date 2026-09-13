@@ -71,14 +71,24 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
     step = 0
     trace_logs = []
     tools_list = mcp_server.list_tools()
+    observations = []       # Lịch sử Action -> Observation để nạp cho lượt kế tiếp
+    executed_calls = set()  # Các Action đã thực hiện (tránh LLM gọi lặp cùng tool, cùng tham số)
     
     while step < MAX_ITERATIONS:
         step += 1
         step_start_time = time.time()
         print(f"\n--- 🔄 Vòng lặp ReAct Loop (Step {step}/{MAX_ITERATIONS}) ---")
         
-        # Gọi LLM với Native Tool Calling Specs
-        llm_response = provider.generate_with_tools(user_query, tools_list, system_prompt=REACT_AGENT_SYSTEM_PROMPT)
+        # Gọi LLM với Native Tool Calling Specs (kèm các Observation đã nhận ở lượt trước)
+        prompt = user_query
+        if observations:
+            prompt = (
+                f"Câu hỏi của sinh viên: {user_query}\n\n"
+                "Các bước đã thực hiện:\n" + "\n".join(observations) + "\n\n"
+                "Dựa trên các Observation trên: nếu đã đủ thông tin, hãy trả lời sinh viên bằng văn bản; "
+                "nếu còn thiếu, hãy gọi Tool tiếp theo. Không gọi lại Tool với tham số đã dùng."
+            )
+        llm_response = provider.generate_with_tools(prompt, tools_list, system_prompt=REACT_AGENT_SYSTEM_PROMPT)
         latency_ms = round((time.time() - step_start_time) * 1000, 2)
         
         thought = llm_response.get("thought", "Đang suy luận...")
@@ -104,6 +114,22 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
             arguments = llm_response.get("arguments", {})
             
             print(f"🛠️ [Action Proposed]: {tool_name}({arguments})")
+
+            # LLM lặp lại đúng Action đã thực hiện -> không có thông tin mới, kết thúc với Final Answer từ Observation gần nhất
+            call_key = json.dumps([tool_name, arguments], sort_keys=True, ensure_ascii=False)
+            if call_key in executed_calls:
+                print(f"🧠 [Thought]: Action này đã được thực hiện ở bước trước. Tổng hợp kết quả phản hồi.")
+                print(f"🏁 [Final Answer]: {final_answer}")
+                trace_logs.append({
+                    "step": step,
+                    "query": user_query,
+                    "action_type": "FINAL_ANSWER",
+                    "thought": "Action lặp lại, tổng hợp kết quả từ Observation gần nhất.",
+                    "output": final_answer,
+                    "latency_ms": latency_ms
+                })
+                break
+            executed_calls.add(call_key)
             
             # Thực thi Tool qua MCP Server
             mcp_result = mcp_server.call_tool(tool_name, arguments)
@@ -139,13 +165,23 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
                 "step": step,
                 "query": user_query,
                 "action_type": "TOOL_EXECUTION",
+                "thought": thought,
                 "tool_name": tool_name,
                 "arguments": arguments,
                 "observation": obs_data,
                 "latency_ms": latency_ms
             })
             
+            # Nạp Observation cho lượt kế tiếp -> quay lại đầu vòng lặp để LLM quyết định bước tiếp theo
+            observations.append(
+                f"- Step {step} | Action: {tool_name}({json.dumps(arguments, ensure_ascii=False)}) "
+                f"| Observation: {json.dumps(obs_data, ensure_ascii=False)}"
+            )
+            if step < MAX_ITERATIONS:
+                continue
+
             # Kết thúc vòng lặp sau khi hoàn tất Observation và xuất Final Answer
+            # (chỉ xảy ra khi đã đạt giới hạn MAX_ITERATIONS)
             print(f"🧠 [Thought]: Đã nhận được dữ liệu từ MCP Server. Tổng hợp kết quả phản hồi.")
             print(f"🏁 [Final Answer]: {final_answer}")
             
@@ -155,7 +191,7 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
                 "action_type": "FINAL_ANSWER",
                 "thought": "Tổng hợp kết quả từ MCP Server thành công.",
                 "output": final_answer,
-                "latency_ms": 10.0
+                "latency_ms": round((time.time() - step_start_time) * 1000, 2)
             })
             break
 

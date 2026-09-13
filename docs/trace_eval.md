@@ -2,7 +2,7 @@
 
 > **Họ và Tên Học viên:** [Điền Họ và Tên]  
 > **Mã Sinh Viên / Mã Học viên:** [Điền MSSV]  
-> **Chủ đề Lựa chọn:** [Điền tên chủ đề đã chọn từ docs/DANH_SACH_DE_TAI.md hoặc Đề tài Mở]  
+> **Chủ đề Lựa chọn:** Gợi ý 1.1 — Trợ lý Học vụ & Tra cứu Lịch thi VinUni (tra cứu điểm GPA, lịch thi và đặt lịch tư vấn học vụ với Cố vấn)  
 
 ---
 
@@ -10,11 +10,11 @@
 
 | Tiêu chí Đánh giá | Mức độ (1 - 5) | Giải trình chi tiết lý do chọn điểm |
 | :--- | :---: | :--- |
-| **1. Multi-step Reasoning** | / 5 | Bài toán có yêu cầu chia nhỏ nhiều bước suy luận nối tiếp nhau không? |
-| **2. Tool Interaction** | / 5 | Hệ thống có cần kết nối với MCP Server / Cơ sở dữ liệu bên ngoài không? |
-| **3. Dynamic Decision** | / 5 | Bước tiếp theo có phụ thuộc vào kết quả quan sát bước trước không? |
-| **4. Long Horizon Goal** | / 5 | Hệ thống có phải giữ mục tiêu xuyên suốt qua nhiều lượt xử lý không? |
-| **TỔNG ĐIỂM AGENTIC FIT** | **/ 20** | *Nếu tổng điểm > 12/20: Bài toán rất phù hợp triển khai Agentic System.* |
+| **1. Multi-step Reasoning** | 4 / 5 | Nhiều yêu cầu phải tách thành chuỗi bước nối tiếp. Ví dụ: *"GPA của SV2026001 thế nào, nếu thấp thì đặt lịch gặp cố vấn chiều 15/09"* → (1) tra cứu hồ sơ học vụ, (2) đánh giá GPA, (3) lấy tên cố vấn phụ trách từ hồ sơ, (4) đặt lịch hẹn. Không chấm 5 vì phần lớn luồng chỉ dài 2–3 bước, không cần lập kế hoạch phức tạp. |
+| **2. Tool Interaction** | 5 / 5 | Toàn bộ dữ liệu cốt lõi (GPA, trạng thái học, cố vấn, lịch thi, lịch hẹn) nằm trong hệ thống học vụ bên ngoài, LLM không thể tự biết. Bắt buộc gọi tool qua MCP Server: `academic_query` để đọc dữ liệu và `schedule_appointment` để **ghi** (tạo booking). Chatbot thuần không có tool sẽ bịa GPA/lịch hẹn → sai nghiệp vụ. |
+| **3. Dynamic Decision** | 4 / 5 | Bước tiếp theo phụ thuộc trực tiếp vào Observation: nếu `academic_query` trả `NOT_FOUND` → dừng và hỏi lại mã SV thay vì đặt lịch; nếu tìm thấy → dùng trường `advisor` trong kết quả làm `advisor_name` cho lượt gọi sau; nếu người dùng thiếu thời gian hẹn → hỏi lại trước khi gọi tool. Không chấm 5 vì tập nhánh rẽ còn hữu hạn và dễ dự đoán. |
+| **4. Long Horizon Goal** | 3 / 5 | Agent cần giữ mục tiêu "đặt được lịch tư vấn cho đúng sinh viên" qua vài vòng Thought → Action → Observation và có thể qua nhiều lượt hội thoại (bổ sung mã SV, chốt giờ). Tuy vậy mỗi phiên thường kết thúc trong một vài lượt, không cần memory dài hạn hay theo dõi tiến độ nhiều ngày → mức trung bình. |
+| **TỔNG ĐIỂM AGENTIC FIT** | **16 / 20** | *16 > 12 → Bài toán **phù hợp** triển khai ReAct Agent (Cấp 3) kết nối MCP Server; chưa cần Autonomous Agent (Cấp 4) vì mục tiêu ngắn hạn và phạm vi tool nhỏ.* |
 
 ---
 
@@ -28,7 +28,9 @@ Dán 1 đoạn trích xuất log tiêu biểu từ file `docs/trace_waterfall.js
 [
   {
     "step": 1,
+    "query": "Mình là sinh viên SV2026001, mình không nhớ cố vấn học tập của mình là ai. Hãy kiểm tra giúp mình rồi đặt lịch gặp đúng cố vấn đó lúc 14:00 ngày 15/09/2026.",
     "action_type": "TOOL_EXECUTION",
+    "thought": "Gemini quyết định gọi công cụ 'academic_query' với tham số: {\"student_id\": \"SV2026001\"}",
     "tool_name": "academic_query",
     "arguments": {
       "student_id": "SV2026001"
@@ -38,10 +40,43 @@ Dán 1 đoạn trích xuất log tiêu biểu từ file `docs/trace_waterfall.js
       "student_id": "SV2026001",
       "data": {
         "full_name": "Nguyễn Văn An",
-        "gpa": 3.85
+        "class": "AI-K4",
+        "gpa": 3.85,
+        "email": "an.nv@vinuni.edu.vn",
+        "status": "Đang học",
+        "advisor": "PGS.TS Nguyễn Văn A"
       }
     },
-    "latency_ms": 120.5
+    "latency_ms": 1561.46
+  },
+  {
+    "step": 2,
+    "query": "Mình là sinh viên SV2026001, mình không nhớ cố vấn học tập của mình là ai. Hãy kiểm tra giúp mình rồi đặt lịch gặp đúng cố vấn đó lúc 14:00 ngày 15/09/2026.",
+    "action_type": "TOOL_EXECUTION",
+    "thought": "Gemini quyết định gọi công cụ 'schedule_appointment' với tham số: {\"datetime_str\": \"14:00 15/09/2026\", \"student_id\": \"SV2026001\", \"advisor_name\": \"PGS.TS Nguyễn Văn A\"}",
+    "tool_name": "schedule_appointment",
+    "arguments": {
+      "datetime_str": "14:00 15/09/2026",
+      "student_id": "SV2026001",
+      "advisor_name": "PGS.TS Nguyễn Văn A"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "booking_id": "BK-SV2026001-99",
+      "student_id": "SV2026001",
+      "datetime": "14:00 15/09/2026",
+      "advisor": "PGS.TS Nguyễn Văn A",
+      "message": "Đặt lịch thành công cho sinh viên SV2026001 với PGS.TS Nguyễn Văn A vào lúc 14:00 15/09/2026."
+    },
+    "latency_ms": 2216.57
+  },
+  {
+    "step": 3,
+    "query": "Mình là sinh viên SV2026001, mình không nhớ cố vấn học tập của mình là ai. Hãy kiểm tra giúp mình rồi đặt lịch gặp đúng cố vấn đó lúc 14:00 ngày 15/09/2026.",
+    "action_type": "FINAL_ANSWER",
+    "thought": "Gemini phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
+    "output": "Chào bạn, \n\nMình đã kiểm tra thông tin và hỗ trợ bạn đặt lịch hẹn thành công:\n\n* **Cố vấn học tập của bạn:** PGS.TS Nguyễn Văn A\n* **Thông tin lịch hẹn:**\n  * **Thời gian:** 14:00 ngày 15/09/2026\n  * **Mã lịch hẹn:** BK-SV2026001-99\n\nBạn hãy lưu lại thông tin này để tiện gặp thầy đúng giờ nhé. Chúc bạn có một buổi tư vấn học tập hiệu quả!",
+    "latency_ms": 3818.33
   }
 ]
 ```
@@ -50,9 +85,9 @@ Dán 1 đoạn trích xuất log tiêu biểu từ file `docs/trace_waterfall.js
 
 ## 3. TỔNG KẾT KẾT QUẢ NGHIỆM THU & NỘP BÀI
 
-- [ ] Đã điền API Key thật trong `.env` và xác nhận Agent chạy mượt mà trên LLM API thật (Gemini/OpenAI).
-- **Tổng số Test Cases đã chạy thành công:** ___ / 5 test cases.
-- **Số lượt gọi Tool qua MCP Server chính xác:** ___ lượt.
+- [x] Đã điền API Key thật trong `.env` và xác nhận Agent chạy mượt mà trên LLM API thật (Gemini/OpenAI).
+- **Tổng số Test Cases đã chạy thành công:** 5 / 5 test cases.
+- **Số lượt gọi Tool qua MCP Server chính xác:** 5 lượt.
 - **Kết quả đẩy Repo nộp bài:** [ ] Đã Commit và Push mã nguồn thành công lên GitHub cá nhân.
 
 ---
