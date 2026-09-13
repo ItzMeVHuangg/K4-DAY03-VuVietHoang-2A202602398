@@ -28,55 +28,55 @@ Dán 1 đoạn trích xuất log tiêu biểu từ file `docs/trace_waterfall.js
 [
   {
     "step": 1,
-    "query": "Mình là sinh viên SV2026001, mình không nhớ cố vấn học tập của mình là ai. Hãy kiểm tra giúp mình rồi đặt lịch gặp đúng cố vấn đó lúc 14:00 ngày 15/09/2026.",
+    "query": "Mình là SV2026002, mình quên tên cố vấn học tập của mình, kiểm tra giúp mình rồi đặt lịch gặp cố vấn đó lúc 10:00 ngày 20/09/2026",
     "action_type": "TOOL_EXECUTION",
-    "thought": "Gemini quyết định gọi công cụ 'academic_query' với tham số: {\"student_id\": \"SV2026001\"}",
+    "thought": "Gemini quyết định gọi công cụ 'academic_query' với tham số: {\"student_id\": \"SV2026002\"}",
     "tool_name": "academic_query",
     "arguments": {
-      "student_id": "SV2026001"
+      "student_id": "SV2026002"
     },
     "observation": {
       "status": "SUCCESS",
-      "student_id": "SV2026001",
+      "student_id": "SV2026002",
       "data": {
-        "full_name": "Nguyễn Văn An",
+        "full_name": "Trần Thị Bình",
         "class": "AI-K4",
-        "gpa": 3.85,
-        "email": "an.nv@vinuni.edu.vn",
+        "gpa": 3.6,
+        "email": "binh.tt@vinuni.edu.vn",
         "status": "Đang học",
-        "advisor": "PGS.TS Nguyễn Văn A"
+        "advisor": "TS. Lê Thị B"
       }
     },
-    "latency_ms": 1561.46
+    "latency_ms": 2372.82
   },
   {
     "step": 2,
-    "query": "Mình là sinh viên SV2026001, mình không nhớ cố vấn học tập của mình là ai. Hãy kiểm tra giúp mình rồi đặt lịch gặp đúng cố vấn đó lúc 14:00 ngày 15/09/2026.",
+    "query": "Mình là SV2026002, mình quên tên cố vấn học tập của mình, kiểm tra giúp mình rồi đặt lịch gặp cố vấn đó lúc 10:00 ngày 20/09/2026",
     "action_type": "TOOL_EXECUTION",
-    "thought": "Gemini quyết định gọi công cụ 'schedule_appointment' với tham số: {\"datetime_str\": \"14:00 15/09/2026\", \"student_id\": \"SV2026001\", \"advisor_name\": \"PGS.TS Nguyễn Văn A\"}",
+    "thought": "Gemini quyết định gọi công cụ 'schedule_appointment' với tham số: {\"datetime_str\": \"10:00 20/09/2026\", \"student_id\": \"SV2026002\", \"advisor_name\": \"TS. Lê Thị B\"}",
     "tool_name": "schedule_appointment",
     "arguments": {
-      "datetime_str": "14:00 15/09/2026",
-      "student_id": "SV2026001",
-      "advisor_name": "PGS.TS Nguyễn Văn A"
+      "datetime_str": "10:00 20/09/2026",
+      "student_id": "SV2026002",
+      "advisor_name": "TS. Lê Thị B"
     },
     "observation": {
       "status": "SUCCESS",
-      "booking_id": "BK-SV2026001-99",
-      "student_id": "SV2026001",
-      "datetime": "14:00 15/09/2026",
-      "advisor": "PGS.TS Nguyễn Văn A",
-      "message": "Đặt lịch thành công cho sinh viên SV2026001 với PGS.TS Nguyễn Văn A vào lúc 14:00 15/09/2026."
+      "booking_id": "BK-SV2026002-99",
+      "student_id": "SV2026002",
+      "datetime": "10:00 20/09/2026",
+      "advisor": "TS. Lê Thị B",
+      "message": "Đặt lịch thành công cho sinh viên SV2026002 với TS. Lê Thị B vào lúc 10:00 20/09/2026."
     },
-    "latency_ms": 2216.57
+    "latency_ms": 2509.21
   },
   {
     "step": 3,
-    "query": "Mình là sinh viên SV2026001, mình không nhớ cố vấn học tập của mình là ai. Hãy kiểm tra giúp mình rồi đặt lịch gặp đúng cố vấn đó lúc 14:00 ngày 15/09/2026.",
+    "query": "Mình là SV2026002, mình quên tên cố vấn học tập của mình, kiểm tra giúp mình rồi đặt lịch gặp cố vấn đó lúc 10:00 ngày 20/09/2026",
     "action_type": "FINAL_ANSWER",
     "thought": "Gemini phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
-    "output": "Chào bạn, \n\nMình đã kiểm tra thông tin và hỗ trợ bạn đặt lịch hẹn thành công:\n\n* **Cố vấn học tập của bạn:** PGS.TS Nguyễn Văn A\n* **Thông tin lịch hẹn:**\n  * **Thời gian:** 14:00 ngày 15/09/2026\n  * **Mã lịch hẹn:** BK-SV2026001-99\n\nBạn hãy lưu lại thông tin này để tiện gặp thầy đúng giờ nhé. Chúc bạn có một buổi tư vấn học tập hiệu quả!",
-    "latency_ms": 3818.33
+    "output": "Chào bạn, \n\nMình đã kiểm tra thông tin và hỗ trợ đặt lịch hẹn cho bạn thành công:\n\n* **Cố vấn học tập của bạn:** TS. Lê Thị B\n* **Thông tin lịch hẹn:**\n  * **Thời gian:** 10:00 ngày 20/09/2026\n  * **Mã lịch hẹn:** BK-SV2026002-99\n\nNếu cần hỗ trợ thêm bất kỳ thông tin nào khác, bạn cứ tự nhiên hỏi nhé! Chúc bạn có một buổi tư vấn học tập hiệu quả.",
+    "latency_ms": 3368.68
   }
 ]
 ```
