@@ -1,7 +1,7 @@
 # 📊 BÁO CÁO THU HOẠCH NGHIỆM THU BÀI LAB 3 (BƯỚC 3 — SUBMISSION ARTIFACT)
 
-> **Họ và Tên Học viên:** [Điền Họ và Tên]  
-> **Mã Sinh Viên / Mã Học viên:** [Điền MSSV]  
+> **Họ và Tên Học viên:** Vũ Việt Hoàng 
+> **Mã Sinh Viên / Mã Học viên:** 2A202602398  
 > **Chủ đề Lựa chọn:** Gợi ý 1.1 — Trợ lý Học vụ & Tra cứu Lịch thi VinUni (tra cứu điểm GPA, lịch thi và đặt lịch tư vấn học vụ với Cố vấn)  
 
 ---
